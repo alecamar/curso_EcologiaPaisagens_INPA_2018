@@ -1,0 +1,36 @@
+---
+title: "Script 01: Baixar, manipular e recortar mapa"
+author: "Alexandre Camargo Martensen"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    fig_caption: yes
+    toc: yes
+    toc_depth: 2
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+---
+
+# Introdução
+
+O trabalho de Ecologia de Paisagens ou da Ecologia Espacial via de regra parte de um **mapa** como base. Estes mapas podem ser elaborados, através por exemplo da classificação de imagens de satélite ou de fotografias aéreas (ver aula *fontes de informação*), ou podem ser baixados diretamente da internet, *i.e.,* alguém já fez o trabalho de classificação para você. Atualmente existem diversos bancos de dados para diferentes regiões como por exemplo os mapas gerados pelo Hansen e colaboradores (XXXXX), para todo o planeta, ou o MapBiomas e o TerraClass, para o Brasil.
+
+## Objetivos desse exercício
+Neste exercício iremos aprender a *baixar um mapa da internet*, no caso iremos baixar um mapa do bioma Mata Atlântica. Na sequência iremos *explorá-lo e recortar* uma pequena área para nossas análises futuras. Iremos também *reclassificá-lo* de forma a tornar as classes mais simples para nossas análises futuras.  
+
+## Pacotes que serão utilizados nesta etapa
+```{r}
+require(raster)
+```
+
+# Baixar mapa
+
+http://storage.googleapis.com/mapbiomas-public/COLECAO/3/CONSOLIDACAO/MATAATLANTICA.tif
+
+# Manipular mapa
+
+# Recortar mapa
+
+# Reclassificar e exportá-lo para uso futuro
+
