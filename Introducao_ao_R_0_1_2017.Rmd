@@ -1,0 +1,531 @@
+---
+title: "Breve Introducao ao R - v-0.1.2017"
+author: "A. C. Martensen"
+date: '`r Sys.time()`'
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+  html_document:
+    fig_caption: yes
+    toc: yes
+    toc_depth: 2
+---
+
+# 1. Introdução
+
+
+## 1.1 Linguagem Orientada a Objeto
+
+
+O R é uma linguagem orientada a objeto, ou seja, "tudo tem que ser atribuído a um objeto"
+
+Veja por exemplo esta adição **sem** atribuição:
+```{r}
+2+2
+```
+
+E compare com esta adição **com** atribuição:
+```{r}
+soma<-2+2
+```
+<br>
+
+Na primeira o **R** executa a adição e nos retorna o resultado. Na segunda, nós criamos uma variável "soma", o **R** executa a adição e atribui o valor resultante da adição a variável "soma" que nós criamos. Ou seja, se você digitar "soma", o **R** retornará o valor da adição.
+
+<br>
+
+```{r}
+soma
+```
+
+Veja que agora "soma" ? uma variável numérica (*i.e.,*  é um número) com valor "4".
+
+```{r}
+str(soma)
+```
+
+Você pode "passar" esse valor para outro "objeto". Neste caso vamos criar o objeto "obj.2" e atribuir o valor de "soma" para esta nova variável:
+
+```{r}
+obj.2<-soma
+```
+
+Que tipo de objeto você acha que "obj.2" é? E qual o valor? Use os comandos acima para confirmar a sua resposta.
+
+
+\newpage
+
+Mas veja que se você atribuir um outro valor para a variável "soma", ela muda de valor e de categoria:
+```{r}
+soma<-"a"
+```
+
+Use a função str() novamente para avaliar qual o tipo de variável e o valor dessa variável. Veja que agora soma é um *chr* "character", ou seja, letra/palavra, com valor de **a**. Tente digitar **a** sem as aspas (" "). O que acontece?
+
+```{r, eval=FALSE}
+soma<-a
+```
+O **R** deve ter retornado alguma mensagem similar à essa: "Error: object 'a' not found". O que você acha que aconteceu?
+
+E se você atribuir um valor para "a" e depois atribuir "a" a "soma"?
+
+```{r}
+a<-56
+```
+
+```{r}
+soma<-a
+
+a
+
+soma
+```
+
+```{r}
+identical(soma, a)
+```
+
+<br>
+
+Quando usamos "aspas", indicamos para o R criar uma variável *chr*, ou seja, é uma letra ou palavra, não um número. 
+
+Mas e se atribuirmos um número entre "aspas"? O que acontece? Verifique com os comandos acima que tipo de variável é a variável *teste*.
+```{r}
+teste<-"12"
+
+teste
+```
+
+\newpage
+
+## 1.2 O básico da linguagem
+
+Podemos também criar variáveis por exemplo variando de 5 até 50
+```{r}
+v5_50_by_1<-5:50
+
+v5_50_by_1
+```
+
+E podemos fazer a mesma variável ao invés de ser de 1 em 1, agora ser de 2 em 2 com a função *seq()*.
+```{r}
+v5_50_by_2<-seq(from=5, to=50, by=2)
+
+v5_50_by_2
+```
+
+Ou criar uma variável com 100 números "uns" com a função *rep()*.
+```{r}
+v1_1_100<-rep(1, 100)
+```
+
+Todas as funções artiméticas seguem o mesmo princípio de prioridade que a matemática define. Por exemplo, veja os resultados das seguintes equações:
+```{r}
+res.1<-3^2+4
+
+# ? diferente de 
+
+res.2<-3^(2+4)
+
+# e
+
+res.3<-4/2+5
+
+# ? diferente de
+
+res.4<-4/(2+5)
+
+# O s?mbolo # ? utilizado para se fazer um coment?rio. 
+# Isto significa que o R vai interpretar essa linha toda como algo que n?o ? para rodar.
+
+# Deixar coment?rios ao longo do c?digo ajuda muito na compreens?o do c?digo, tanto para
+# outras pessoas, quanto para voc? mesmo daqui e umas semanas.
+```
+
+Fatorial
+```{r}
+factorial(4)
+```
+
+Logaritmo
+```{r}
+log2(10)          # base 2
+log(10)           # natural
+log10(10)         # base 10
+logb(10, base=4)  # usu?rio define a base
+```
+
+Raíz quadrada
+```{r}
+sqrt(4)
+```
+
+Ou seja, o R é uma boa calculadora!
+
+<br>
+
+Podemos também fazer cálculos usando um conjunto de dados.
+```{r}
+sq.1<- seq(1:10)
+
+sq.2<-sq.1*2
+
+sq.3<-sq.1+sq.2
+
+sq.4<-sq.3-sq.2/sq.1
+```
+
+Veja os resultados das operações acima.
+
+Qual é a classe de sq.1?
+
+```{r}
+class(sq.1)
+
+str(sq.1)
+```
+
+Podemos criar uma tabela com esses valores
+```{r}
+tab.1<-cbind(sq.1, sq.2, sq.3, sq.4)
+
+# Junta colunas
+
+tab.2<-rbind(sq.1, sq.2, sq.3, sq.4)
+
+# Junta linhas
+```
+
+Qual é a classe de tab.1?
+
+Podemos transformá-la em *data.frame* que possui propriedades diferentes de *matrix*.
+```{r}
+tab.1.df<-data.frame(tab.1) # transforma em data.frame
+
+tab.2.df<-data.frame(tab.2)
+
+tab.1
+
+tab.1.df
+
+class(tab.1.df) # classe do objeto
+
+ncol(tab.1.df) # n?mero de colunas
+
+nrow(tab.1.df) # n?mero de linhas
+```
+
+Podemos acessar linhas dessa tabela
+````{r}
+tab.1.df[1,]
+
+tab.1.df[3,]
+
+tab.1.df[1:3,]
+```
+
+Ou colunas
+```{r}
+tab.1.df[,2]
+
+tab.1.df[,c(2,4)]
+```
+
+Ou "célula" em especial
+```{r}
+tab.1.df[2,1]
+```
+
+Só ver o começo da tabela
+```{r}
+head(tab.1.df)
+```
+
+Só as 3 primeiras linhas
+```{r}
+head(tab.1.df, 3)
+```
+
+Só as últimas 6 linhas
+```{r}
+tail(tab.1.df)
+```
+
+Só as últimas 2 linhas
+```{r}
+tail(tab.1.df, 2)
+```
+
+\newpage
+
+Somar os valores das colunas
+```{r}
+colSums(tab.1.df)
+```
+
+Somar os valores das linhas
+```{r}
+rowSums(tab.1.df)
+```
+
+Valores extremos
+```{r}
+range(tab.1.df)
+```
+
+*Summary* do data.frame
+```{r}
+summary(tab.1.df)
+```
+
+Transpor a tabela
+```{r}
+tab.1.df
+
+t(tab.1.df)
+```
+
+Retorna os valores únicos, i.e. "sem repetição"
+```{r}
+ex.1<-c(0, 1, 1, 1, 2, 3, 4, 5, 6, 7)
+unique(ex.1)
+```
+
+Boleanas
+```{r}
+3 > 4
+
+4 < 5
+
+4 != 5 # diferente
+
+a<-1:5 # O que esse comando faz? 
+
+b<-3:7
+
+c<-5:1
+
+a==b
+
+a==c
+```
+
+<br>
+
+<br>
+
+E muito mais...
+
+**A pergunta não é "Se o R faz"... Mas sim "Como fazer no R..."**
+
+\newpage
+
+## 1.3 **?** O comando mais importante!
+
+O **R** apresenta um manual muito bom e detalhado. Todas as funções seguem o mesmo padrão de explicação, e depois que pegamos familiaridade, fica muito fácil de se usar.
+
+Vamos usar como exemplo a função *rnorm()*. Digite a linha de código abaixo.
+
+```{r, eval=FALSE}
+?rnorm
+```
+
+
+![Um exemplo de página de ajuda](F:/____old_dropbox/Ale/Consultoria/Cursos/Fatec_2017_cursoR/help_rnorm.png)
+
+
+No topo da página aparece o nome curto da função, no caso, da função *Normal* e entre chaves { } o nome do pacote, neste caso o *stats*. Na sequência aparece o nome da função e uma descrição do que a função faz, seguido de como se usar. 
+
+Pela descrição podemos ver que dnorm() é a "density function", pnorm() é a "distribution function", qnorm() retorna a função do quantis e por fim, a rnorm() é uma função de geração de numeros aleatórios seguindo a distribuição normal, com média e desvio padrão especificados.
+
+Ai podemos ver como a *rnorm* funciona => *rnorm(n, mean=0, sd =1)*. Os argumentos estão descritos abaixo, e podemos ver que o *n* do rnorm 
+é o número de observações, mean é a média e sd é o desvio padrão. Nos detalhes podemos ver que o "default" para a média é 0, e para o desvio padrão é 1, assim como detalhes de como são calculadas as funçoes de densidade.
+
+No fim das páginas sempre tem alguns exemplos, que basta se copiar e colar.
+
+Vamos ver na prática como funciona.
+
+```{r, echo=FALSE}
+set.seed(1050)
+```
+
+```{r}
+distr<-rnorm(n=100, mean=10, sd=10)
+
+mean(distr)
+
+sd(distr)
+```
+
+Esse comando criou um conjunto de 100 números (*n*=100), com média próxima de 10 (*mean*=10), neste caso `r mean(distr)` e desvio padrão também próximo de 10 (*sd*=10), neste caso `r sd(distr)`.
+
+Mas será que a função gerou números seguindo mesmo uma distribuição normal. Uma das formas de verificarmos isso é atraves de um histograma.
+
+```{r, echo=FALSE, fig.cap="a. Histograma; b. Gr?fico cont?nuo"}
+par(mfrow=c(1,2))
+hist(distr, main="Histograma")
+abline(v=mean(distr), col="blue", lwd=3)
+text(3, 21, "m?dia", col="blue")
+plot(density(distr), main="Cont?nuo")
+abline(v=mean(distr), col="blue")
+text(20, 0.005, "m?dia", col="blue")
+```
+
+Através dos gráficos acima, podemos ver que a distribuição é de fato bem próxima de uma distribuição normal. Iremos aprender como fazer esses gráficos mais para frente no curso.
+
+<br>
+
+
+Vamos agora usar um segundo exemplo, com base no **Teste T**. Se digitarmos *?t.test*, vamos abrir uma página similar a que abrimos anteriormente para *rnorm()*.
+
+Vamos explorar os exemplos agora. Copie e cole o primeiro exemplo
+
+```{r}
+t.test(1:10, y = c(7:20)) 
+```
+
+Estamos rodando um **Teste T** em dois conjuntos de dados. Quais são eles?
+
+# 2. Um exemplo um pouco mais real (mas nem tanto)
+
+Agora vamos usar um conjunto de dados com base nesse exemplo, para mostrar como podemos prontamente utilizar os exemplos do **R**. 
+
+Vamos dizer que temos dois talhões de eucalipto, um que foi submetido a um determinado tratamento de adubação e outro que foi o controle, e não recebeu adubação. 
+
+O talhão adubado apresentou os seguintes valores de DAP
+```{r}
+talhao.adubado<-c(26, 23, 24, 27, 30, 26, 25, 27, 28, 29, 27, 24, 23, 24, 
+                  23, 22, 21, 20, 27, 29, 28, 26, 30, 31, 32, 26, 27, 28, 29, 30)
+```
+
+O talhão controle apresentou os seguintes valores de DAP
+```{r}
+talhao.controle<-c(11, 12, 19, 18, 20, 21, 17, 14, 16, 14, 18, 13, 21, 13, 
+                   17, 13, 15, 17, 18, 18, 15, 12, 16, 14, 17, 19, 20, 15, 19, 20)
+```
+
+Vamos agora explorar o conjunto de dados do talhão adubado
+
+<br>
+
+Vamos usar a função *summary* para obter um panorama geral dos dados
+```{r}
+summary(talhao.adubado)
+```
+
+Quantos registros temos?
+```{r}
+length(talhao.adubado)
+```
+
+Se quisermos ordenar os dados usamos a função *sort*
+```{r}
+sort(talhao.adubado)
+
+sort(talhao.controle)
+```
+
+Como achamos a média e o desvio padrão, sem usar o *summary*?
+```{r}
+mean(talhao.adubado)
+
+sd(talhao.adubado)
+```
+
+Para fazer um histograma
+```{r, fig.cap="Histograma dos dados do talhão adubado", fig.width=5, fig.height=4}
+hist(talhao.adubado)
+```
+
+Podemos usar um gráfico mais elaborados para se avaliar a distribuição
+```{r, fig.cap="Gráfico da distribuição observada (preta) sobreposta a uma distribuição normal de mesma média e desvio padrão (azul). Linha sólida representando a média, pontilhados + e - 1 e 2 desvios padrões", fig.height=3.5, fig.width=5}
+plot(density(talhao.adubado))
+
+abline(v=mean(talhao.adubado), col="blue", lty=1)
+
+abline(v=(mean(talhao.adubado)-sd(talhao.adubado)), col="blue", lty=2)
+abline(v=(mean(talhao.adubado)+sd(talhao.adubado)), col="blue", lty=2)
+
+abline(v=(mean(talhao.adubado)-(2*sd(talhao.adubado))), col="blue", lty=3)
+abline(v=(mean(talhao.adubado)+(2*sd(talhao.adubado))), col="blue", lty=3)
+
+set.seed(1242)
+dist.norm<-rnorm(n=30, mean=mean(talhao.adubado), sd=sd(talhao.adubado))
+
+dist.norm.density<-density(dist.norm)
+
+lines(dist.norm.density, col="blue")
+```
+
+
+Se ainda assim quiser rodar um teste de normalidade
+```{r}
+shapiro.test(talhao.adubado)
+```
+
+<br>
+<br>
+
+Agora, explore os dados do talhão controle.
+
+\newpage
+
+Agora que já exploramos as variáveis, voltamos para o **teste T**
+
+<br>
+
+E agora basta copiar o exemplo, alterando para as variáveis que medimos nos talhões.
+```{r}
+t.test(talhao.adubado, talhao.controle)
+```
+
+Este resultado tem sentido? Vamos ver através de gráficos.
+```{r, eval=TRUE, fig.height=5, fig.cap="Gráfico dos valores para os dois tratamentos"}
+var.1<-density(talhao.adubado)
+var.2<-density(talhao.controle)
+
+plot(var.1, type="n", xlim=c(0, 32), ylim=c(0, 0.15), main="Gráfico variáveis Teste T")
+polygon(var.1, col="blue")
+polygon(var.2, col="red")
+lines(var.1, col="blue")
+
+abline(v=mean(talhao.adubado), lty=2, col="black")
+abline(v=mean(talhao.controle), lty=2, col="black")
+
+text(12, 0.12, "   Média 
+     Controle", col="red")
+text(22, 0.13, "Média 
+     Tratamento", col="blue")
+```
+
+<br>
+
+## 2.1 Como buscar ajuda pela internet
+
+Lembre-se **GIYF* (Google Is Your Friend)... 
+
+R-seek: sua pergunta, ou r-project: sua pergunta. Inúmeras listas de discussões, etc... 
+
+Mas faça a lição de casa antes!!! Pesquise para ver se a resposta para a sua pergunta já não está 
+disponível na internet (99,999% das vezes já está!!!)... E caso não esteja... Formule 
+corretamente a pergunta, *i.e.,* clara, objetiva e com um pequeno exemplo que seja facilmente
+reproduzível (que dê para copiar, colar e rodar!).
+
+Caso você faça perguntas que as respostas sejam óbvias e já estejam disponíveis... esteja preparado
+para ter respostas não muito educadas (RFM!/RtFM!)... 
+
+A comunidade é muito solicita, e sempre pronta para ajudar... Mas lembre-se que as pessoas estão "doando" o tempo delas... Faça bom uso dessa doação! 
+
+<br>
+
+\newpage
+
+# 3. Session Info ()
+
+
+Session Info é extremamente importante para se garantir que as suas análises possam ser reproduzidas
+```{r}
+sessionInfo()
+```
+
