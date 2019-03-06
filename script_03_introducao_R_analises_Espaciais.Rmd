@@ -18,6 +18,7 @@ library(rgeos)
 library(maptools)
 library(rgdal)
 library(raster)
+library(plotKML)
 ```
 
 ## Entra o mapa
@@ -138,6 +139,19 @@ Nesta tabela você tem 3 colunas, além do "nome" das linhas. A primeira ID, ind
 dim(mapa@data)
 ```
 
+Note que cada um dos *polygons* tem também 5 *slots*.
+```{r}
+str(mapa, max.level=3)
+```
+
+Podemos verificar estes *slots* da seguinte maneira
+```{r}
+str(mapa@polygons[[1]])
+```
+
+Temos os 5 *slots* precedidos por **@**, sendo eles *@Polygons*, *@plotOrder*, *@labpt*, *@ID*, *@area*. 
+
+
 Voltando a representação do mapa, caso queremos mostrar cada classe com uma cor diferente, podemos plotar este mapa da seguinte maneira:
 ```{r}
 plot(mapa, col=(mapa$CLAS_NIVEL))
@@ -147,79 +161,48 @@ Ou, se quisermos definir cores que nos facilitem a identificação das classes, 
 ```{r}
 unique(mapa$CLAS_NIVEL)
 ```
-Posteriormente definimos as cores
+Posteriormente definimos as cores que iremos usar para cada classe dos poligonos
 ```{r}
-plot(mapa)
-plot(mapa[mapa$CLAS_NIVEL=="52:Instalacoes rurais",], col="grey")
+mapa@data<-cbind(mapa@data, mapa@data$CLAS_NIVEL)
+colnames(mapa@data)[4]<-"cores"
+head(mapa@data)
 
-plot(my.select[which(my.select$cat==1),],lwd=0.05,col="green",add=TRUE) 
-ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 0] <- "#006837"
-ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 1] <- "#31A354"
-ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 2] <- "#78C679"
-ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 3] <- "#C2E699"
-ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 4] <- "#FFFFCC"
+mapa@data$cores <- as.character(mapa@data$cores)
+mapa@data$cores[mapa@data$cores=="52:Instalacoes rurais"]<-"grey"
+mapa@data$cores[mapa@data$cores=="32:Pasto Sujo"]<-"orange"
+mapa@data$cores[mapa@data$cores=="12:Vegetacao Florestal Media"]<-"green"
+mapa@data$cores[mapa@data$cores=="31:Pasto Limpo"]<-"yellow"
+mapa@data$cores[mapa@data$cores=="11:Vegetacao Florestal Inicial"]<-"lightgreen"
+mapa@data$cores[mapa@data$cores=="38:Cabruca"]<-"brown"
+mapa@data$cores[mapa@data$cores=="20:Campo umido degradado"]<-"cyan"
+mapa@data$cores[mapa@data$cores=="10:Corpo dagua"]<-"blue"
+mapa@data$cores[mapa@data$cores=="13:Vegetacao Florestal Avancada"]<-"darkgreen"
+mapa@data$cores[mapa@data$cores=="18:Afloramento rochoso/Campo rupestre"]<-"black"
+mapa@data$cores[mapa@data$cores=="39:Area degradada"]<-"red"
+```
+
+E finalmente plotamos o mapa
+```{r, fig.align='center'}
+par(mar=c(1,1,1,1))
+plot(mapa, col=mapa@data$cores, border="transparent")
+legend("bottomright", legend = c("Inst.Rurais", "p.sujo", "FloMed", "p.limpo", "FloIni", "Cabruc", "CamUmi", "Agua", "FloAva", "Rochas", "Degrad"), fill=c("grey", "orange", "green", "yellow", "lightgreen", "brown", "cyan", "blue", "darkgreen", "black", "red"))
+```
+
+Existem diversas outras formas de nós plotarmos mapas, incluindo através do pacote **ggplot2**, que iremos ver mais pra frente no curso.
+
+## Plotar no Google Earth
+
+Uma das tarefas que podemos fazer é abrir os nossos mapas no *Google Earth*. As imagens de alta resolução do Google Earth podem nos ajudar a avaliar um mapeamento, ou nos orientar em um trabalho de campo, por exemplo. Além disso, podem nos ajudar a gerar figuras mais bonitas para relatórios e/ou palestras.
+
+```{r}
+plotKML(mapa["CLAS_NIVEL"], color="red")
 ```
 
 
 ```{r}
-plot(mapa, col=c("grey", "orange", "green", "yellow", "lightgreen", "brown", "cyan", "blue", "darkgreen", "darkgrey", "red"))
-legend()
 
 ```
 
-
-
-```{r, fig.}
-
-```
-
-
-###		Cria KML
-plotKML(mapa.ipe, color="red")
-
-###		Classes do mapa
-lev.ipe<-levels(mapa.ipe$CLAS_NIVEL)
-
-lev.ipe
-
-###		Separando as classes do mapa
-
-mapa.ipe.agu <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[1],]
-mapa.ipe.ini <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[2],]
-mapa.ipe.med <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[3],]
-mapa.ipe.ava <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[4],]
-mapa.ipe.rup <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[5],]
-mapa.ipe.umi <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[6],]
-mapa.ipe.lim <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[7],]
-mapa.ipe.suj <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[8],]
-mapa.ipe.cab <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[9],]
-mapa.ipe.deg <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[10],]
-mapa.ipe.rur <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[11],]
-
-plot(mapa.ipe.agu, col="blue")
-
-###		Plota mapa com classes
-x11(1400, 800)
-plot(mapa.ipe.agu, col="blue")
-plot(mapa.ipe.ini, col="lightgreen", add=TRUE)
-plot(mapa.ipe.med, col="green", add=TRUE)
-plot(mapa.ipe.ava, col="darkgreen", add=TRUE)
-plot(mapa.ipe.rup, col="grey", add=TRUE)
-plot(mapa.ipe.umi, col="purple", add=TRUE)
-plot(mapa.ipe.lim, col="yellow", add=TRUE)
-plot(mapa.ipe.suj, col="orange", add=TRUE)
-plot(mapa.ipe.cab, col="brown", add=TRUE)
-plot(mapa.ipe.deg, col="black", add=TRUE)
-plot(mapa.ipe.rur, col="black", add=TRUE)
-
-cores96<-c("blue", "lightgreen", "green", "darkgreen", "grey", "purple", "yellow", "orange", "brown", "black", "black")
-legend("right", legend = c("Água", "Inicial", "Média", "Avancada", "Rupestre", "Campo Úmido", "Pasto Limpo", "Pasto Sujo", "Cabruca", "Degradado", "Casas"), col=cores96, text.col = cores96)
-
-###		Cria figuras 
-
-png("Flo_med.png", bg="white")
-plot(mapa.ipe.med,col='green', border="green")
-dev.off()
 
 pdf("Flo_pasto2.pdf", bg="transparent")
 plot(mapa.ipe.lim, col="orange", border="black")
