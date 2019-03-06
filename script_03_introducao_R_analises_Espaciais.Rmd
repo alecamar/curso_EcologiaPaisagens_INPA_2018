@@ -1,0 +1,311 @@
+---
+title: "Script 03: Introducao_analises_Espaciais_no_R"
+author: "ACMartensen"
+date: "March 6, 2019"
+output: html_document
+---
+
+# Objetivos
+
+Os objetivos desta aula serão que você ganhe maior familiaridade com o R, particularmente no tocante a manipular e plotar vetores e rasters
+
+
+## Estes são os pacotes que iremos utilizar nesta etapa
+
+```{r}
+library(sp)
+library(rgeos)
+library(maptools)
+library(rgdal)
+library(raster)
+```
+
+## Entra o mapa
+
+```{r}
+mapa<-readOGR(dsn="./data", layer="sel_2_07")
+```
+
+##	Plotar e explorar o mapa
+
+Aqui você poderá ver o mapa, com os limites dos polígonos em preto e com os polígonos em si em branco, independente da classe desses polígonos.
+```{r}
+plot(mapa)
+```
+
+Você pode mudar as cores dessa representação através do atributo *col*, que por exemplo, neste caso mudamos de branco para vermelho.
+```{r}
+plot(mapa, col="red")
+```
+
+Se usarmos o argumento *border*, podemos alterar as bordas dos polígonos, do *default* preto, para neste caso, vermelho.
+```{r}
+plot(mapa, border="red")
+```
+
+Juntando os atributos *col* e *border* podemos começar a montar nossos mapas da forma que achamos mais conveniente.
+```{r}
+plot(mapa, col="black", border="red")
+```
+
+Da mesma maneira que vimos em etapas anteriores podemos verificar qual é a *Class* do objeto **mapa**
+```{r}
+class(mapa)
+```
+
+Você deve ter um *output* mais ou menos similar a este abaixo, onde você pode ver que se trata de um *"SpatialPolygonsDataFrame"*
+
+> class(mapa)
+[1] "SpatialPolygonsDataFrame"
+attr(,"package")
+[1] "sp"
+
+Qual é a estrutura desse objeto? Ou seja, do que ele é composto? Utilizando a função **str()** podemos verificar exatamente isso... Digite no seu terminal **R** o código abaixo:
+```{r, eval=FALSE}
+str(mapa)
+```
+
+Você deve ter visto que apareceu um monte de coisas escritas, e meio rápido, fica até difícil da gente saber do que se trata e entender o que está sendo mostrado.
+
+
+Vamos tentar da seguinte maneira:
+```{r}
+str(mapa, max.level=2)
+```
+
+Agora ficou mais fácil e curto, vamos tentar entender: 
+
+Na primeira linha do output nós temos de novo qual é a *class* do objeto, que já sabemos é um *"SpatialPolygonsDataFrame"*, mas também temos uma informação adicional, que esse objeto tem 5 *slots*. Esses *slots* são mostrados logo na sequência sempre precedidos de **@**, sendo eles: **@data**, **@polygons**, **@plotOrder**, **@bbox** e **@proj4string**, como você pode ver abaixo, ou no output do seu terminal.
+
+Formal class 'SpatialPolygonsDataFrame' [package "sp"] with 5 slots
+  ..@ data       :'data.frame':	284 obs. of  3 variables:
+  ..@ polygons   :List of 284
+  ..@ plotOrder  : int [1:284] 284 81 150 282 217 119 174 28 176 205 ...
+  ..@ bbox       : num [1:2, 1:2] 421022 8174981 430442 8182503
+  .. ..- attr(*, "dimnames")=List of 2
+  ..@ proj4string:Formal class 'CRS' [package "sp"] with 1 slot
+  
+Outra forma de verificarmos o nome dos *slots*:
+```{r}
+slotNames(mapa)
+```
+
+  
+Vamso agora tentar entender o que cada um desses *slots* são. 
+
+Toda vez que quisermos acessar um *slot* de um *"SpatialPolygonsDataFrame"* devemos usar a seguinte notação: o nome do *"SpatialPolygonsDataFrame"* seguido de **@** e do nome do *slot* que buscamos a informação.
+
+Vamos começar de baixo para cima.
+```{r}
+mapa@proj4string
+```
+
+Você deve ter obtido um output similar a este abaixo, com os argumentos do *CRS*. CRS é *"coordinate reference system"*, ou seja, no *slot* *@proj4string* temos informações sobre o sistema de coordenadas do nosso **mapa**.
+
+CRS arguments:
+ +proj=utm +zone=24 +south +ellps=aust_SA +units=m +no_defs 
+
+
+O código abaixo mostra a *"bounding box"*, ou seja, os valores extremos no eixo X e no eixo Y que envolvem todo o mapa.
+```{r}
+mapa@bbox
+```
+
+Você também pode verificar essa *"bounding box"* dessa maneira
+```{r}
+bbox(mapa)
+```
+
+E se quiser ver ela plotada, podemos ver dessa maneira
+```{r, fig.sub, fig.cap='Representações da "bounding box"', fig.subcap=c('Apenas a "bounding box"', 'Aqui a "bounding box e o mapa"'), out.extra='keepaspectratio', fig.align='center'}
+par(mfrow=c(1,2))
+plot(extent(bbox(mapa)), main="Aqui só a bounding box")
+plot(extent(bbox(mapa)), main="Aqui com o mapa também")
+plot(mapa, add=TRUE)
+```
+Veja que nesse caso existe uma questão de representação dos mapas que iremos ver mais pra frente. 
+
+Seguindo nos *slots* temos o *@plotOrder* e o *@polygons*. O *@plotOrder* é um conjunto de números inteiros (*int*), e que é simplesmente a lista que os polígonos serão plotados. O *@polygons* é uma lista, com todos os, neste caso, 284 polígonos. Veja que ambos os *slots* indicam a presença de 284 polígonos.
+
+Por fim temos o *slot* *@data*, que para quem está familiarizado com SIG é simplesmente a tabela de atributos
+```{r}
+head(mapa@data, 10)
+```
+
+Nesta tabela você tem 3 colunas, além do "nome" das linhas. A primeira ID, indica o identificador do mapa original, e nas duas seguintes, a coluna "GRIDCODE" e a "CLAS_NIVEL" indicam ambas, qual a classe do polígono... por exemplo se é uma florestal, ou um pasto. Neste caso, pedimos para mostrar as 10 primeiras linhas, mas se você digitar o código abaixo, vai ver que cada um dos 284 polígonos que verificamos a existência no *slot* *@polygons* tem uma linha ai nesta tabela.
+
+```{r}
+dim(mapa@data)
+```
+
+Voltando a representação do mapa, caso queremos mostrar cada classe com uma cor diferente, podemos plotar este mapa da seguinte maneira:
+```{r}
+plot(mapa, col=(mapa$CLAS_NIVEL))
+```
+
+Ou, se quisermos definir cores que nos facilitem a identificação das classes, primeiro verificamos as classes
+```{r}
+unique(mapa$CLAS_NIVEL)
+```
+Posteriormente definimos as cores
+```{r}
+plot(mapa)
+plot(mapa[mapa$CLAS_NIVEL=="52:Instalacoes rurais",], col="grey")
+
+plot(my.select[which(my.select$cat==1),],lwd=0.05,col="green",add=TRUE) 
+ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 0] <- "#006837"
+ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 1] <- "#31A354"
+ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 2] <- "#78C679"
+ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 3] <- "#C2E699"
+ra@data$COLOUR[(as.numeric(as.character(ra@data$RA_CODE11)) %% 10) == 4] <- "#FFFFCC"
+```
+
+
+```{r}
+plot(mapa, col=c("grey", "orange", "green", "yellow", "lightgreen", "brown", "cyan", "blue", "darkgreen", "darkgrey", "red"))
+legend()
+
+```
+
+
+
+```{r, fig.}
+
+```
+
+
+###		Cria KML
+plotKML(mapa.ipe, color="red")
+
+###		Classes do mapa
+lev.ipe<-levels(mapa.ipe$CLAS_NIVEL)
+
+lev.ipe
+
+###		Separando as classes do mapa
+
+mapa.ipe.agu <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[1],]
+mapa.ipe.ini <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[2],]
+mapa.ipe.med <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[3],]
+mapa.ipe.ava <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[4],]
+mapa.ipe.rup <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[5],]
+mapa.ipe.umi <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[6],]
+mapa.ipe.lim <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[7],]
+mapa.ipe.suj <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[8],]
+mapa.ipe.cab <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[9],]
+mapa.ipe.deg <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[10],]
+mapa.ipe.rur <- mapa.ipe[mapa.ipe$CLAS_NIVEL %in% lev.ipe[11],]
+
+plot(mapa.ipe.agu, col="blue")
+
+###		Plota mapa com classes
+x11(1400, 800)
+plot(mapa.ipe.agu, col="blue")
+plot(mapa.ipe.ini, col="lightgreen", add=TRUE)
+plot(mapa.ipe.med, col="green", add=TRUE)
+plot(mapa.ipe.ava, col="darkgreen", add=TRUE)
+plot(mapa.ipe.rup, col="grey", add=TRUE)
+plot(mapa.ipe.umi, col="purple", add=TRUE)
+plot(mapa.ipe.lim, col="yellow", add=TRUE)
+plot(mapa.ipe.suj, col="orange", add=TRUE)
+plot(mapa.ipe.cab, col="brown", add=TRUE)
+plot(mapa.ipe.deg, col="black", add=TRUE)
+plot(mapa.ipe.rur, col="black", add=TRUE)
+
+cores96<-c("blue", "lightgreen", "green", "darkgreen", "grey", "purple", "yellow", "orange", "brown", "black", "black")
+legend("right", legend = c("Água", "Inicial", "Média", "Avancada", "Rupestre", "Campo Úmido", "Pasto Limpo", "Pasto Sujo", "Cabruca", "Degradado", "Casas"), col=cores96, text.col = cores96)
+
+###		Cria figuras 
+
+png("Flo_med.png", bg="white")
+plot(mapa.ipe.med,col='green', border="green")
+dev.off()
+
+pdf("Flo_pasto2.pdf", bg="transparent")
+plot(mapa.ipe.lim, col="orange", border="black")
+title("Pasto Limpo")
+axis(1)
+axis(2)
+dev.off()
+
+###		Manipula mapa
+
+class(mapa.ipe.med)
+
+str(mapa.ipe.med) # ppt
+
+slotNames(mapa.ipe.med)
+
+
+
+###		"Tabela de Atributos"
+mapa.ipe.med@data
+
+############################################################################################
+###
+###		Calcula Métricas
+###
+############################################################################################
+
+###		Area
+
+mapa.ipe.med@polygons
+
+mapa.ipe.med@polygons[[1]]@area
+
+i<-1
+area.tot<-NA
+while (i < length(mapa.ipe.med)+1){
+	area<-data.frame(mapa.ipe.med@polygons[[i]]@area)
+	area.tot<-rbind(area.tot, area)
+	i<-i+1
+	}
+	area.tot<-area.tot[-1,]
+	
+	hist(area.tot)
+	mean(area.tot)
+	sum(area.tot)
+	
+area.med.gAr <-gArea(mapa.ipe.med)
+area.med.sum <-sum(area.tot)
+
+area.med.gAr
+area.med.sum
+
+### Ou...
+
+area.sapp <- data.frame(area=sapply(slot(mapa.ipe.med,"polygons"), slot, "area"))
+
+head(area.sapp)
+sum(area.sapp)
+sub.area.sapp<-subset(area.sapp, area.sapp>259480.5)
+
+sub.area.sapp/10000
+
+round(sub.area.sapp/10000)
+
+round(sub.area.sapp/10000, digits=2)
+
+###		Métricas patch
+
+rast.mapa.ipe.med <- vect2rast(mapa.ipe.med, cell.size=5)
+
+image(rast.mapa.ipe.med)
+
+patch.metrics = PatchStat(rast.mapa.ipe.med)
+
+dt<-cbind(mapa.ipe.med@data, patch.metrics)
+
+mapa.ipe.med@data<-dt
+mapa.ipe.med
+
+dt.limpa<-dt[,-(1:3)]
+
+cor(dt.limpa)
+
+dsn<-getwd()
+writeOGR(mapa.ipe.med2, dsn=dsn, layer="mapa.ipe.res", driver="ESRI Shapefile")
+
+
+
+
