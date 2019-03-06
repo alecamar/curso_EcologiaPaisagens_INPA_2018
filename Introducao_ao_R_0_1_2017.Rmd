@@ -1,5 +1,5 @@
 ---
-title: "Breve Introducao ao R - v-0.1.2017"
+title: "Script 01: Breve Introducao ao R - v-0.1.2017"
 author: "A. C. Martensen"
 date: '`r Sys.time()`'
 output:
